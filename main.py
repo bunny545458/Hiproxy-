@@ -8,11 +8,9 @@ CORS_HEADERS = {
 }
 
 def handler(request):
-    # OPTIONS (CORS preflight)
     if request.method == "OPTIONS":
         return ("", 200, CORS_HEADERS)
 
-    # Read ?url=
     query = parse_qs(urlparse(request.url).query)
     target_url = query.get("url", [None])[0]
 
@@ -23,20 +21,16 @@ def handler(request):
         resp = requests.get(
             target_url,
             headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "User-Agent": "Mozilla/5.0",
                 "Accept": "*/*",
-                "Accept-Language": "en-US,en;q=0.5",
             },
-            timeout=10,
-            allow_redirects=True
+            timeout=10
         )
 
         headers = CORS_HEADERS.copy()
-        headers["Content-Type"] = resp.headers.get(
-            "Content-Type", "text/plain"
-        )
+        headers["Content-Type"] = resp.headers.get("Content-Type", "text/plain")
 
         return (resp.text, resp.status_code, headers)
 
     except Exception as e:
-        return (f"Error: {str(e)}", 500, CORS_HEADERS)
+        return (str(e), 500, CORS_HEADERS)
